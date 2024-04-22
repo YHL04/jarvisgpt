@@ -3,7 +3,7 @@
 import torch.nn as nn
 
 from .attention import Attention
-from .feedforward import FeedForward
+from .feedforward import FFN, GEGLU
 
 
 class AttentionLayer(nn.Module):
@@ -24,7 +24,7 @@ class AttentionLayer(nn.Module):
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
 
-        self.ffn = FeedForward(dim=d_model, inner_dim=ffn_hidden)
+        self.ffn = GEGLU(dim=d_model, inner_dim=ffn_hidden)
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=p)
 
