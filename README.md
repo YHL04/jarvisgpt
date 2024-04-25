@@ -1,7 +1,22 @@
 
 
-Other Architectures
+# Jarvis GPT
 
+## Description
+
+Jarvis GPT uses Gemma as a base model to try and 
+improve reasoning in math and coding through algorithmic
+design.
+
+## Getting Started
+
+None
+
+## Milestones
+
+Architectures
+
+- [X] Gemma
 - [ ] Griffin
 - [ ] Mamba
 

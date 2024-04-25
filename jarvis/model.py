@@ -13,7 +13,7 @@ class AutoregressiveLM(nn.Module):
         vocab_size
         max_len
         n_layers
-        d_model
+        dim
         n_head
         p
 
@@ -24,39 +24,28 @@ class AutoregressiveLM(nn.Module):
         get_state()
     """
 
-    def __init__(self,
-                 cls,
-                 vocab_size,
-                 max_len=512,
-                 n_layers=4,
-                 d_model=512,
-                 n_head=8,
-                 p=0.1,
-                 device="cuda",
-                 **kwargs
-                 ):
+    def __init__(self, cls, vocab_size, max_len, n_layers,
+                 dim, n_head, device, **kwargs):
 
         super(AutoregressiveLM, self).__init__()
 
         self.vocab_size = vocab_size
         self.max_len = max_len
         self.n_layers = n_layers
-        self.d_model = d_model
+        self.dim = dim
         self.n_head = n_head
-        self.p = p
 
-        self.transformer = Transformer(
+        self.transformer = cls(
             vocab_size=vocab_size,
             max_len=max_len,
             n_layers=n_layers,
-            d_model=d_model,
+            dim=dim,
             n_head=n_head,
-            p=p,
             device=device,
             **kwargs
         )
 
-        self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
+        self.lm_head = nn.Linear(dim, vocab_size, bias=False)
 
     def load_pretrained(self):
         self.transformer.load_pretrained()

@@ -21,13 +21,13 @@ class FFN(nn.Module):
         inner_dim (int): The dimension of the hidden layer
     """
 
-    def __init__(self, dim, inner_dim):
-        super(FeedForward, self).__init__()
+    def __init__(self, dim, hidden_dim):
+        super(FFN, self).__init__()
 
         self.ff = nn.Sequential(
-            nn.Linear(dim, inner_dim),
+            nn.Linear(dim, hidden_dim),
             nn.GELU(),
-            nn.Linear(inner_dim, dim)
+            nn.Linear(hidden_dim, dim)
         )
 
     def forward(self, x):
@@ -45,11 +45,11 @@ class GEGLU(nn.Module):
         dim (int): The dimension of the input and output
         inner_dim (int): The dimension of the hidden layer
     """
-    def __init__(self, dim, inner_dim):
+    def __init__(self, dim, hidden_dim):
         super(GEGLU, self).__init__()
-        self.gate_proj = nn.Linear(dim, dim)
-        self.up_proj = nn.Linear(dim, inner_dim)
-        self.down_proj = nn.Linear(inner_dim, dim)
+        self.gate_proj = nn.Linear(dim, hidden_dim, bias=False)
+        self.up_proj = nn.Linear(dim, hidden_dim, bias=False)
+        self.down_proj = nn.Linear(hidden_dim, dim, bias=False)
 
     def forward(self, x):
         gate = self.gate_proj(x)
@@ -58,3 +58,4 @@ class GEGLU(nn.Module):
         fuse = gate * up
         outputs = self.down_proj(fuse)
         return outputs
+

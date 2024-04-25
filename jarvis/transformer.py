@@ -2,7 +2,7 @@
 
 import torch.nn as nn
 
-from .embedding import TransformerEmbedding
+from .embedding import TokenEmbedding
 from .layer import AttentionLayer
 
 
@@ -11,41 +11,29 @@ class Transformer(nn.Module):
     A standard Transformer module that outputs the unprocessed
     output of the last transformer layer
 
-    Parameters:
+    Args:
         vocab_size (int): Vocabulary size
         max_len (int): Max length
         n_layers (int): Number of layers
-        d_model (int): Dimension of transformer
+        dim (int): Dimension of transformer
         n_head (int): Number of attention heads
         p (int): Dropout probability
 
     """
 
-    def __init__(self,
-                 vocab_size,
-                 max_len=512,
-                 n_layers=4,
-                 d_model=768,
-                 n_head=8,
-                 p=0.1,
-                 device="cuda",
-                 **kwargs
-                 ):
+    def __init__(self, vocab_size, max_len, n_layers,
+                 dim, hidden_dim, n_head, device, **kwargs):
 
         super(Transformer, self).__init__()
         self.n_layers = n_layers
-        self.d_model = d_model
+        self.dim = dim
         self.device = device
 
-        self.embedding = TransformerEmbedding(vocab_size=vocab_size,
-                                              d_model=d_model,
-                                              max_len=max_len,
-                                              device=device)
+        self.embedding = TokenEmbedding(vocab_size=vocab_size, dim=dim)
 
-        self.layers = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                    ffn_hidden=4 * d_model,
-                                                    n_head=n_head,
-                                                    p=p)
+        self.layers = nn.ModuleList([AttentionLayer(dim=dim,
+                                                    hidden_dim=hidden_dim,
+                                                    n_head=n_head)
                                     for _ in range(n_layers)])
 
         self.reset()
@@ -64,13 +52,12 @@ class Transformer(nn.Module):
         """
         Computes transformer output
 
-        Parameters:
-        ids (Tensor[batch_size, length]): tokens
-        state (Tensor[batch_size, state_len, d_model]): recurrent state
-
+        Args:
+            ids (Tensor[batch_size, length]): tokens
+            state (Tensor[batch_size, state_len, dim]): recurrent state
         Returns:
-        x (Tensor[batch_size, length, d_model]): output
-        state (Tensor[batch_size, length, d_model]): next recurrent state
+            x (Tensor[batch_size, length, dim]): output
+            state (Tensor[batch_size, length, dim]): next recurrent state
 
         """
         x = self.embedding(ids)

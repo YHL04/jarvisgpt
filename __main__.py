@@ -1,3 +1,4 @@
+
 import argparse
 from torch.utils.data import DataLoader
 
@@ -12,9 +13,8 @@ def main():
     parser.add_argument("--seq_len", default=512, type=int)
     parser.add_argument("--vocab_size", default=30522, type=int)
     parser.add_argument("--n_layers", default=4, type=int)
-    parser.add_argument("--d_model", default=768, type=int)
+    parser.add_argument("--dim", default=768, type=int)
     parser.add_argument("--n_head", default=8, type=int)
-    parser.add_argument("--p", default=0.1, type=float)
     parser.add_argument("--lr", default=4e-5, type=float)
     parser.add_argument("--batch_size", default=32, type=int)
     parser.add_argument("--accum", default=4, type=int)
@@ -28,13 +28,12 @@ def main():
     args = parser.parse_args()
 
     lm = AutoregressiveLM(
-        cls=RecurrentMemoryTransformer,
+        cls=Transformer,
         vocab_size=args.vocab_size,
         max_len=args.seq_len,
         n_layers=args.n_layers,
-        d_model=args.d_model,
+        dim=args.dim,
         n_head=args.n_head,
-        p=args.p,
         device=args.device,
         w=128,
         bsz=args.batch_size,

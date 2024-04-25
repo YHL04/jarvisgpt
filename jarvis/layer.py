@@ -2,8 +2,9 @@
 
 import torch.nn as nn
 
-from .attention import Attention
-from .feedforward import FFN, GEGLU
+from .attention import MultiQueryAttention
+from .feedforward import GEGLU
+from .norm import RMSNorm
 
 
 class AttentionLayer(nn.Module):
@@ -12,34 +13,30 @@ class AttentionLayer(nn.Module):
     normalization, dropout, and a feed-forward network
 
     Args:
-        d_model (int): The dimension of the model
-        ffn_hidden (int): The size of the hidden layer in the feed forward network
+        dim (int): The dimension of the model
+        ffn_dim (int): The size of the hidden layer in the feed forward network
         n_head (int): The number of attention heads
         p (float): The probability of dropout
     """
 
-    def __init__(self, d_model, ffn_hidden, n_head, p):
+    def __init__(self, dim, hidden_dim, n_head):
         super(AttentionLayer, self).__init__()
-        self.attention = Attention(d_model=d_model, n_head=n_head)
-        self.norm1 = nn.LayerNorm(d_model)
-        self.dropout1 = nn.Dropout(p=p)
+        self.attention = MultiQueryAttention(dim=dim, n_head=n_head)
+        self.ffn = GEGLU(dim=dim, hidden_dim=hidden_dim)
 
-        self.ffn = GEGLU(dim=d_model, inner_dim=ffn_hidden)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.dropout2 = nn.Dropout(p=p)
+        self.norm1 = RMSNorm(dim)
+        self.norm2 = RMSNorm(dim)
 
     def forward(self, x, mask=None, is_causal=False):
         """Compute the output of the transformer layer"""
         _x = x
+        x = self.norm1(x)
         x = self.attention(q=x, kv=x, mask=mask, is_causal=is_causal)
-
-        x = self.norm1(x + _x)
-        x = self.dropout1(x)
+        x = x + _x
 
         _x = x
+        x = self.norm2(x)
         x = self.ffn(x)
-
-        x = self.norm2(x + _x)
-        x = self.dropout2(x)
+        x = x + _x
 
         return x
