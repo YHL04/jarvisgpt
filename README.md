@@ -1,6 +1,6 @@
 
 
-# Jarvis GPT
+# JarvisGPT
 
 ## Description
 
